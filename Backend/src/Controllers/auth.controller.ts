@@ -2,6 +2,7 @@ import User from "../Models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import type { Request, Response } from "express";
+import { Redisclient } from "../config/redis.js";
 
 
 //Regiter controller , Register a new user
@@ -92,6 +93,21 @@ export const GetProfileController=async(req:Request,res:Response)=>{
     return res.status(200).json({ user });
   } catch (error) {
     console.error("Error in getProfileController:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+//Logout controller , Logout a user by clearing the token cookie
+export const LogoutController=async(req:Request,res:Response)=>{
+  const token = req.cookies.token;
+  if(!token){
+    return res.status(401).json({Message:"Unauthorized"})
+  }
+  try{
+    res.clearCookie("token");
+    return res.status(200).json({Message:"Logout successful"})
+  } catch (error) {
+    console.error("Error in logoutController:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }

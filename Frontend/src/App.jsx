@@ -38,7 +38,7 @@ export default function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!input.trim()) return;
-    // TODO: Send input to backend
+    
     console.log("Sending to backend:", input);
     setInput('');
   };
