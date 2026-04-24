@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -15,7 +17,7 @@ export default function Register() {
       <div className="w-full max-w-md bg-surface rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-8 md:p-10 border border-surface-highest/30 relative overflow-hidden">
         {/* Subtle gradient glow effect at the top */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary-container" />
-        
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-surface-low border border-surface-highest/50 mb-4 shadow-sm">
             <span className="text-2xl">⚔️</span>
@@ -81,9 +83,12 @@ export default function Register() {
         <div className="mt-8 pt-6 border-t border-surface-highest/30 text-center">
           <p className="text-sm text-secondary">
             Already have an account?{' '}
-            <a href="/login" className="font-semibold text-primary hover:text-primary-container transition-colors">
+            <span
+              onClick={() => navigate('/login')}
+              className="font-semibold text-primary hover:text-primary-container transition-colors cursor-pointer"
+            >
               Sign in
-            </a>
+            </span>
           </p>
         </div>
       </div>
