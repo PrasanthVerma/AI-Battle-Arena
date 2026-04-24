@@ -3,17 +3,23 @@ import useGraph from "./services/graph.ai.service.js";
 const app = express();
 import cors from "cors";
 import dotenv from "dotenv";
-import router from "./routes/auth.routes.js"; 
+import router from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 dotenv.config();
 
-app.use(cors());
-app.use(router);
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
+app.use(router);
 
 app.use("/api/auth", router);
-
 
 app.get("/use-graph", async (req, res) => {
   try {
@@ -25,8 +31,5 @@ app.get("/use-graph", async (req, res) => {
     console.log(err);
   }
 });
-
-
-
 
 export default app;

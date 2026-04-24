@@ -1,12 +1,22 @@
 import React, { useState } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { handleLogin } = useAuth()
+
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Login submitted", { email, password });
+    handleLogin({ email, password }).then(() => {
+      navigate('/home', { replace: true });
+    }).catch((error) => {
+      // Handle login error, e.g., show error message
+      console.error('Login failed:', error);
+    });
   };
 
   return (
@@ -14,7 +24,7 @@ export default function Login() {
       <div className="w-full max-w-md bg-surface rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.5)] p-8 md:p-10 border border-surface-highest/30 relative overflow-hidden">
         {/* Subtle gradient glow effect at the top */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary-container" />
-        
+
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-surface-low border border-surface-highest/50 mb-4 shadow-sm">
             <span className="text-2xl">⚡</span>
@@ -44,9 +54,7 @@ export default function Login() {
               <label className="text-xs font-bold text-secondary uppercase tracking-wider" htmlFor="password">
                 Password
               </label>
-              <a href="#" className="text-xs font-semibold text-primary hover:text-primary-container transition-colors">
-                Forgot password?
-              </a>
+
             </div>
             <input
               id="password"
@@ -70,9 +78,12 @@ export default function Login() {
         <div className="mt-8 pt-6 border-t border-surface-highest/30 text-center">
           <p className="text-sm text-secondary">
             Don't have an account?{' '}
-            <a href="/register" className="font-semibold text-primary hover:text-primary-container transition-colors">
+            <span
+              onClick={() => navigate('/register')}
+              className="font-semibold text-primary hover:text-primary-container transition-colors cursor-pointer"
+            >
               Create one now
-            </a>
+            </span>
           </p>
         </div>
       </div>

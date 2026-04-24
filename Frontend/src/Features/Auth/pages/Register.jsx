@@ -1,15 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
+
 
 export default function Register() {
+  
+  const navigate = useNavigate();
+  const { handleRegister } = useAuth();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Register submitted", { username, email, password });
+    handleRegister({username, email, password}).then(() => {
+      navigate('/login', { replace: true });
+    });
   };
 
   return (
