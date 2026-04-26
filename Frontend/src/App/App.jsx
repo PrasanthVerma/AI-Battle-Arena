@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const data = {
   "problem": "write a code to sort an array of integers in ascending order",
@@ -34,6 +35,7 @@ const FormattedText = ({ text }) => {
 
 export default function App() {
   const [input, setInput] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -48,10 +50,23 @@ export default function App() {
       <div className="max-w-6xl mx-auto space-y-8 pb-32">
         
         {/* Header / Problem Statement */}
-        <header className="bg-surface rounded-2xl p-6 md:p-8 shadow-[0_12px_40px_rgba(26,28,29,0.06)]">
-          <div className="inline-flex items-center space-x-2 bg-surface-low px-3 py-1 rounded-full mb-4">
-            <span className="w-2 h-2 rounded-full bg-primary"></span>
-            <span className="text-xs font-semibold text-secondary uppercase tracking-wider">Problem Statement</span>
+        <header className="bg-surface rounded-2xl p-6 md:p-8 shadow-[0_12px_40px_rgba(26,28,29,0.06)] relative">
+          <div className="flex justify-between items-start mb-4">
+            <div className="inline-flex items-center space-x-2 bg-surface-low px-3 py-1 rounded-full">
+              <span className="w-2 h-2 rounded-full bg-primary"></span>
+              <span className="text-xs font-semibold text-secondary uppercase tracking-wider">Problem Statement</span>
+            </div>
+            <button
+              onClick={() => navigate('/logout')}
+              className="text-sm font-semibold text-secondary hover:text-red-500 transition-colors flex items-center gap-2 bg-surface-low px-4 py-2 rounded-xl border border-surface-highest/30 hover:border-red-500/30 hover:bg-red-500/10"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              Logout
+            </button>
           </div>
           <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-on-surface">
             {data.problem}

@@ -54,6 +54,10 @@ export const LoginController = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid Email" });
     }
 
+    if (!user.password) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -98,50 +102,49 @@ export const GetProfileController = async (req: Request, res: Response) => {
   }
 };
 
-//Logout controller , Logout a user by clearing the token cookie
+//Logout controller , Logout a user by clearing the token cookie and session
 export const LogoutController = async (req: Request, res: Response) => {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).json({ Message: "Unauthorized" });
-  }
-  try {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Logout failed" });
+    }
+    // Also clear JWT token cookie for local auth users
     res.clearCookie("token");
-    return res.status(200).json({ Message: "Logout successful" });
-  } catch (error) {
-    console.error("Error in logoutController:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(200).json({ message: "Logged out successfully" });
+  });
+};
+
+// ========== GOOGLE OAUTH CONTROLLERS ==========
+
+// Google OAuth Callback Handler
+export const GoogleAuthCallback = (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.redirect(
+      `${process.env.FRONTEND_URL || "http://localhost:5173"}/login?error=auth_failed`,
+    );
   }
+
+  // User is already authenticated by Passport and session is set
+  res.redirect(
+    `${process.env.FRONTEND_URL || "http://localhost:5173"}/home?oauth=success`,
+  );
 };
 
-//Google OAuth controller , login/register a using google account
-export const GoogleOAuthController = async (req: Request, res: Response) => {
-  return passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })(req, res);
-};
+// Get Current User (Session-based)
+export const GetCurrentUserController = async (req: Request, res: Response) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
-//Google OAuth callback controller , handle the callback from google after authentication
-export const GoogleOAuthCallbackController = async (
-  req: Request,
-  res: Response,
-) => {
-  return passport.authenticate(
-    "google",
-    { failureRedirect: "/login", session: false },
-    async (err: any, user: any) => {
-      if (err || !user) {
-        return res.redirect("/login");
-      }
-      const token = jwt.sign(
-        {
-          userId: user.id,
-        },
-        process.env.JWT_SECRET!,
-        {
-          expiresIn: "1h",
-        },
-      );
-      return res.redirect(`http://localhost:5173/home`);
+  const user = req.user as any;
+  return res.status(200).json({
+    user: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+      profilePicture: user.profilePicture,
+      authProvider: user.authProvider,
     },
-  )(req, res);
+  });
 };

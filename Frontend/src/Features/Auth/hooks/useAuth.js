@@ -1,14 +1,14 @@
-import {login , register , getme , logout} from "../services/auth.api"
-import {setUser , setLoading , setError} from "../auth.slice"
-import {useDispatch} from "react-redux"
+import { login, register, getme, logout, googleAuth, getCurrentUser } from "../services/auth.api"
+import { setUser, setLoading, setError } from "../auth.slice"
+import { useDispatch } from "react-redux"
 
-export function useAuth(){
+export function useAuth() {
     const dispatch = useDispatch()
 
-    async function handleRegister({email,username,password}){
+    async function handleRegister({ email, username, password }) {
         dispatch(setLoading(true))
-        try{
-            const user = await register({email,username,password})
+        try {
+            const user = await register({ email, username, password })
             dispatch(setUser(user))
         } catch (error) {
             dispatch(setError(error.message))
@@ -17,10 +17,10 @@ export function useAuth(){
         }
     }
 
-    async function handleLogin({email,password}){
+    async function handleLogin({ email, password }) {
         dispatch(setLoading(true))
-        try{
-            const user = await login({email,password})
+        try {
+            const user = await login({ email, password })
             dispatch(setUser(user))
         } catch (error) {
             dispatch(setError(error.message))
@@ -29,9 +29,9 @@ export function useAuth(){
         }
     }
 
-    async function handleGetMe(){
+    async function handleGetMe() {
         dispatch(setLoading(true))
-        try{
+        try {
             const user = await getme()
             dispatch(setUser(user))
         } catch (error) {
@@ -41,9 +41,9 @@ export function useAuth(){
         }
     }
 
-    async function handleLogout(){
+    async function handleLogout() {
         dispatch(setLoading(true))
-        try{
+        try {
             await logout()
             dispatch(setUser(null))
         } catch (error) {
@@ -53,5 +53,38 @@ export function useAuth(){
         }
     }
 
-    return {handleRegister, handleLogin, handleGetMe, handleLogout}
+    // ========== GOOGLE OAUTH HANDLER ==========
+    async function handleGoogleLogin() {
+        dispatch(setLoading(true))
+        try {
+            // Redirect to Google OAuth endpoint
+            await googleAuth()
+        } catch (error) {
+            dispatch(setError(error.message))
+            dispatch(setLoading(false))
+        }
+    }
+
+    // ========== SESSION CHECK HANDLER ==========
+    async function handleCheckSession() {
+        dispatch(setLoading(true))
+        try {
+            const data = await getCurrentUser()
+            dispatch(setUser(data.user))
+        } catch (error) {
+            // No active session, user not logged in
+            dispatch(setUser(null))
+        } finally {
+            dispatch(setLoading(false))
+        }
+    }
+
+    return {
+        handleRegister,
+        handleLogin,
+        handleGetMe,
+        handleLogout,
+        handleGoogleLogin,
+        handleCheckSession
+    }
 }
