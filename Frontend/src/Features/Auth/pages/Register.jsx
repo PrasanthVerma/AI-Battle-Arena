@@ -29,7 +29,7 @@ export default function Register() {
             <span className="text-2xl">⚔️</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight mb-2 text-on-surface">Join the Arena</h1>
-          <p className="text-secondary text-sm">Create an account to start judging AI models.</p>
+          <p className="text-secondary text-sm">Create an account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
