@@ -11,6 +11,7 @@ import { Redisclient } from "./config/redis.js";
 import "./config/passport.js";
 import helmet from "helmet";
 import morgan from "morgan";
+import { ArenaController } from "./Controllers/arena.controller.js";
 
 
 dotenv.config();
@@ -53,15 +54,6 @@ app.use(passport.session());
 // ========== ROUTES ==========
 app.use("/api/auth", router);
 
-app.get("/use-graph", async (req, res) => {
-  try {
-    const result = await useGraph(
-      "write a code to sort an array of integers in ascending order",
-    );
-    res.status(200).json(result);
-  } catch (err) {
-    console.log(err);
-  }
-});
+app.post("/use-graph", ArenaController);
 
 export default app;
