@@ -1,4 +1,4 @@
-import { createClient, RedisClientOptions } from "redis";
+import { createClient, type RedisClientOptions } from "redis";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -14,7 +14,7 @@ if (process.env.REDIS_PASSWORD) {
 }
 
 if (process.env.REDIS_HOST) {
-  options.socket!.host = process.env.REDIS_HOST;
+  (options.socket as any).host = process.env.REDIS_HOST;
 }
 
 export const Redisclient = createClient(options);
