@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "http://localhost:3000/api",
+    baseURL: import.meta.env.VITE_API_URI,
     withCredentials: true,
 });
 
@@ -34,7 +34,7 @@ export async function logout() {
 // Initiate Google OAuth flow
 export async function googleAuth() {
     // This redirects to Google OAuth endpoint
-    window.location.href = 'http://localhost:3000/api/auth/google';
+    window.location.href = `${import.meta.env.VITE_API_URI}/api/auth/google`;
 }
 
 // Get current user based on session
