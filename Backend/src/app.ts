@@ -54,6 +54,6 @@ app.use(passport.session());
 // ========== ROUTES ==========
 app.use("/api/auth", router);
 
-app.post("/use-graph", ArenaController);
+app.post("/api/use-graph", ArenaController);
 
 export default app;
