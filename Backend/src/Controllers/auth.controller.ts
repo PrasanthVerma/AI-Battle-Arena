@@ -86,15 +86,23 @@ export const LoginController = async (req: Request, res: Response) => {
 
 //Get user profile controller , Get the profile of the logged in user
 export const GetProfileController = async (req: Request, res: Response) => {
-  const token = req.cookies.token;
-  if (!token) {
-    return res.status(401).json({ Message: "Unauthorized" });
-  }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      userId: string;
-    };
-    const user = await User.findById(decoded.userId).select("-password");
+    let userId;
+
+    if (req.user) {
+      userId = (req.user as any)._id;
+    } else if (req.cookies.token) {
+      const decoded = jwt.verify(req.cookies.token, process.env.JWT_SECRET!) as {
+        userId: string;
+      };
+      userId = decoded.userId;
+    }
+
+    if (!userId) {
+      return res.status(401).json({ Message: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId).select("-password");
     return res.status(200).json({ user });
   } catch (error) {
     console.error("Error in getProfileController:", error);
