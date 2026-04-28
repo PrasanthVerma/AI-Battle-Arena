@@ -9,8 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-    "types": ["node", "passport", "passport-local", "passport-google-oauth20"],
-    // For nodejs:
+    // Omitting 'types' lets TypeScript auto-discover all @types/* packages
     "lib": ["esnext"],
 
     // Other Outputs
@@ -32,8 +31,6 @@
 
     // Recommended Options
     "strict": true,
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
