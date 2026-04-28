@@ -32,7 +32,14 @@ export const RegisterController = async (req: Request, res: Response) => {
   const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
     expiresIn: "1h",
   });
-  res.cookie("token", token);
+  
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 60 * 60 * 1000, // 1 hour
+  });
   return res.status(201).json({
     message: "User registered successfully",
     user: {
@@ -68,7 +75,13 @@ export const LoginController = async (req: Request, res: Response) => {
       expiresIn: "1h",
     });
 
-    res.cookie("token", token);
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 60 * 60 * 1000, // 1 hour
+    });
 
     return res.status(200).json({
       message: "Login successful",
@@ -117,7 +130,12 @@ export const LogoutController = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Logout failed" });
     }
     // Also clear JWT token cookie for local auth users
-    res.clearCookie("token");
+    const isProduction = process.env.NODE_ENV === "production";
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+    });
     res.status(200).json({ message: "Logged out successfully" });
   });
 };
