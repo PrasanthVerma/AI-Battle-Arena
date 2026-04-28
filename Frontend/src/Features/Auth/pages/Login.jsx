@@ -9,14 +9,14 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleLogin({ email, password }).then(() => {
+    try {
+      await handleLogin({ email, password });
       navigate('/home', { replace: true });
-    }).catch((error) => {
-      // Handle login error, e.g., show error message
-      console.error('Login failed:', error);
-    });
+    } catch {
+      // Error already shown via toast in useAuth
+    }
   };
 
 

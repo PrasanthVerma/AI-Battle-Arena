@@ -1,6 +1,8 @@
 import { login, register, getme, logout, googleAuth, getCurrentUser } from "../services/auth.api"
 import { setUser, setLoading, setError } from "../auth.slice"
 import { useDispatch } from "react-redux"
+import { withToast, handleApiError } from "../../../utils/apiErrorHandler"
+import toast from "react-hot-toast"
 
 export function useAuth() {
     const dispatch = useDispatch()
@@ -8,7 +10,10 @@ export function useAuth() {
     async function handleRegister({ email, username, password }) {
         dispatch(setLoading(true))
         try {
-            const user = await register({ email, username, password })
+            const user = await withToast(
+                () => register({ email, username, password }),
+                { loading: "Creating your account...", success: "Account created! Welcome to the Arena 🎉" }
+            )
             dispatch(setUser(user))
         } catch (error) {
             dispatch(setError(error.message))
@@ -20,7 +25,10 @@ export function useAuth() {
     async function handleLogin({ email, password }) {
         dispatch(setLoading(true))
         try {
-            const user = await login({ email, password })
+            const user = await withToast(
+                () => login({ email, password }),
+                { loading: "Signing in...", success: "Welcome back! ⚡" }
+            )
             dispatch(setUser(user))
         } catch (error) {
             dispatch(setError(error.message))
@@ -44,7 +52,10 @@ export function useAuth() {
     async function handleLogout() {
         dispatch(setLoading(true))
         try {
-            await logout()
+            await withToast(
+                () => logout(),
+                { loading: "Signing out...", success: "Logged out successfully" }
+            )
             dispatch(setUser(null))
         } catch (error) {
             dispatch(setError(error.message))
@@ -53,26 +64,25 @@ export function useAuth() {
         }
     }
 
-    // ========== GOOGLE OAUTH HANDLER ==========
     async function handleGoogleLogin() {
         dispatch(setLoading(true))
         try {
-            // Redirect to Google OAuth endpoint
+            toast.loading("Redirecting to Google...", { id: "google-auth" })
             await googleAuth()
         } catch (error) {
+            toast.dismiss("google-auth")
+            handleApiError(error)
             dispatch(setError(error.message))
             dispatch(setLoading(false))
         }
     }
 
-    // ========== SESSION CHECK HANDLER ==========
     async function handleCheckSession() {
         dispatch(setLoading(true))
         try {
             const data = await getCurrentUser()
             dispatch(setUser(data.user))
-        } catch (error) {
-            // No active session, user not logged in
+        } catch {
             dispatch(setUser(null))
         } finally {
             dispatch(setLoading(false))
