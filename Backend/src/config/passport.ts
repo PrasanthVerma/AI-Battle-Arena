@@ -8,40 +8,40 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // ========== LOCAL STRATEGY (Email/Password Auth) ==========
-passport.use(
-  "local",
-  new LocalStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password",
-    },
-    async (email, password, done) => {
-      try {
-        const user = await User.findOne({ email });
+// passport.use(
+//   "local",
+//   new LocalStrategy(
+//     {
+//       usernameField: "email",
+//       passwordField: "password",
+//     },
+//     async (email, password, done) => {
+//       try {
+//         const user = await User.findOne({ email });
 
-        if (!user) {
-          return done(null, false, { message: "Invalid email or password" });
-        }
+//         if (!user) {
+//           return done(null, false, { message: "Invalid email or password" });
+//         }
 
-        if (!user.password) {
-          return done(null, false, {
-            message: "Please use Google login for your account",
-          });
-        }
+//         if (!user.password) {
+//           return done(null, false, {
+//             message: "Please use Google login for your account",
+//           });
+//         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+//         const isMatch = await bcrypt.compare(password, user.password);
 
-        if (!isMatch) {
-          return done(null, false, { message: "Invalid email or password" });
-        }
+//         if (!isMatch) {
+//           return done(null, false, { message: "Invalid email or password" });
+//         }
 
-        return done(null, user);
-      } catch (error) {
-        return done(error);
-      }
-    },
-  ),
-);
+//         return done(null, user);
+//       } catch (error) {
+//         return done(error);
+//       }
+//     },
+//   ),
+// );
 
 // ========== GOOGLE STRATEGY (OAuth) ==========
 passport.use(
