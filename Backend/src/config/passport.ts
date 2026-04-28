@@ -7,41 +7,55 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+declare global {
+  namespace Express {
+    interface User {
+      _id?: any;
+      username?: string | null;
+      email?: string | null;
+      displayName?: string | null;
+      profilePicture?: string | null;
+      authProvider?: string | null;
+      googleId?: string | null;
+    }
+  }
+}
+
 // ========== LOCAL STRATEGY (Email/Password Auth) ==========
-// passport.use(
-//   "local",
-//   new LocalStrategy(
-//     {
-//       usernameField: "email",
-//       passwordField: "password",
-//     },
-//     async (email, password, done) => {
-//       try {
-//         const user = await User.findOne({ email });
+passport.use(
+  "local",
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email });
 
-//         if (!user) {
-//           return done(null, false, { message: "Invalid email or password" });
-//         }
+        if (!user) {
+          return done(null, false, { message: "Invalid email or password" });
+        }
 
-//         if (!user.password) {
-//           return done(null, false, {
-//             message: "Please use Google login for your account",
-//           });
-//         }
+        if (!user.password) {
+          return done(null, false, {
+            message: "Please use Google login for your account",
+          });
+        }
 
-//         const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
 
-//         if (!isMatch) {
-//           return done(null, false, { message: "Invalid email or password" });
-//         }
+        if (!isMatch) {
+          return done(null, false, { message: "Invalid email or password" });
+        }
 
-//         return done(null, user);
-//       } catch (error) {
-//         return done(error);
-//       }
-//     },
-//   ),
-// );
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    },
+  ),
+);
 
 // ========== GOOGLE STRATEGY (OAuth) ==========
 passport.use(
@@ -91,8 +105,7 @@ passport.use(
           username: email.split("@")[0] || "user", // Use email prefix as username
           profilePicture: profile.photos?.[0]?.value || "",
           authProvider: "google",
-          password: undefined, // No password for Google auth
-        } as any);
+        });
 
         return done(null, newUser);
       } catch (error) {
@@ -103,7 +116,7 @@ passport.use(
 );
 
 // ========== SESSION SERIALIZATION ==========
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user: Express.User, done) => {
   done(null, user._id);
 });
 
