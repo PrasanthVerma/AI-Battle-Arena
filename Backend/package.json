@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch server.ts",
     "migrate:google-users": "tsx migrate-google-users.js",
-    "build":"tsc",
-    "start":"node dist/server.js"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
