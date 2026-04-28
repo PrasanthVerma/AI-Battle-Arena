@@ -1,8 +1,6 @@
 import express from "express";
-// import useGraph from "./services/graph.ai.service.js";
 import cors from "cors";
 import dotenv from "dotenv";
-import router from "./routes/auth.routes.js";
 import cookieParser from "cookie-parser";
 import passport from "passport";
 import session from "express-session";
@@ -11,15 +9,17 @@ import { Redisclient } from "./config/redis.js";
 import "./config/passport.js";
 import helmet from "helmet";
 import morgan from "morgan";
-import { ArenaController } from "./Controllers/arena.controller.js";
-import { GetChatsController, GetChatMessagesController } from "./Controllers/chat.controller.js";
 
+import authRouter from "./routes/auth.routes.js";
+import chatRouter from "./routes/chat.routes.js";
+import arenaRouter from "./routes/arena.routes.js";
 
 dotenv.config();
 
 const app = express();
 app.set("trust proxy", 1); // Trust Render proxy for secure cookies
 app.use(morgan("dev"));
+
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:5173",
   credentials: true,
@@ -54,10 +54,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // ========== ROUTES ==========
-app.use("/api/auth", router);
-
-app.post("/api/use-graph", ArenaController);
-app.get("/api/chats", GetChatsController);
-app.get("/api/chats/:chatId", GetChatMessagesController);
+app.use("/api/auth", authRouter);
+app.use("/api/chats", chatRouter);
+app.use("/api", arenaRouter); // Handles /api/use-graph
 
 export default app;

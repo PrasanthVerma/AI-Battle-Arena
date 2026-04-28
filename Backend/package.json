@@ -21,7 +21,6 @@
     "@langchain/langgraph": "^1.2.9",
     "@langchain/mistralai": "^1.0.7",
     "@types/bcryptjs": "^2.4.6",
-    "@types/connect-redis": "^0.0.23",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -55,9 +54,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14",
     "@types/bcryptjs": "^2.4.6",
-    "@types/connect-redis": "^0.0.23",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -67,6 +64,7 @@
     "@types/node": "^25.6.0",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
-    "@types/passport-local": "^1.0.38"
+    "@types/passport-local": "^1.0.38",
+    "nodemon": "^3.1.14"
   }
 }
