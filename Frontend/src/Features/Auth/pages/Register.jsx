@@ -11,11 +11,14 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    handleRegister({ username, email, password }).then(() => {
+    try {
+      await handleRegister({ username, email, password });
       navigate('/login', { replace: true });
-    });
+    } catch {
+      // Error already shown via toast in useAuth
+    }
   };
 
   const handleGoogleLoginHook = (e) => {

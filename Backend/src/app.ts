@@ -12,6 +12,7 @@ import "./config/passport.js";
 import helmet from "helmet";
 import morgan from "morgan";
 import { ArenaController } from "./Controllers/arena.controller.js";
+import { GetChatsController, GetChatMessagesController } from "./Controllers/chat.controller.js";
 
 
 dotenv.config();
@@ -56,5 +57,7 @@ app.use(passport.session());
 app.use("/api/auth", router);
 
 app.post("/api/use-graph", ArenaController);
+app.get("/api/chats", GetChatsController);
+app.get("/api/chats/:chatId", GetChatMessagesController);
 
 export default app;
