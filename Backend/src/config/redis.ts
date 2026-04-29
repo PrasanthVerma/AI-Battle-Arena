@@ -1,5 +1,6 @@
 import { createClient, type RedisClientOptions } from "redis";
 import dotenv from "dotenv";
+import { error } from "console";
 
 dotenv.config();
 
@@ -20,4 +21,4 @@ if (process.env.REDIS_HOST) {
 export const Redisclient = createClient(options);
 
 Redisclient.on("error", (err) => console.error("Redis Client Error", err));
-Redisclient.connect().catch(console.error);
+Redisclient.connect().catch(error);
