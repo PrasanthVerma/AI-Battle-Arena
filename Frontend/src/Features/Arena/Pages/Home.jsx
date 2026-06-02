@@ -29,6 +29,7 @@ function ChatSidebar({ activeChatId, onSelectChat, onNewChat, refreshTrigger }) 
     const [chats, setChats] = useState([]);
     const [sidebarLoading, setSidebarLoading] = useState(true);
     const [collapsed, setCollapsed] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setSidebarLoading(true);
@@ -49,17 +50,22 @@ function ChatSidebar({ activeChatId, onSelectChat, onNewChat, refreshTrigger }) 
 
     return (
         <aside
-            className={`flex flex-col h-screen bg-surface border-r border-surface-highest/30 transition-all duration-300 flex-shrink-0 ${collapsed ? 'w-14' : 'w-64'}`}
+            className={`flex flex-col h-screen bg-[#0e1014] border-r border-zinc-800/80 transition-all duration-300 flex-shrink-0 ${collapsed ? 'w-14' : 'w-64'}`}
             style={{ position: 'sticky', top: 0 }}
         >
             {/* Sidebar Header */}
-            <div className="flex items-center justify-between p-3 border-b border-surface-highest/30">
-                {!collapsed && (
-                    <span className="text-xs font-bold text-secondary uppercase tracking-wider">Chat History</span>
+            <div className="flex items-center justify-between p-4 border-b border-zinc-800/80">
+                {!collapsed ? (
+                    <div className="flex items-center gap-2">
+                        <span className="text-amber-500 text-lg">⚡</span>
+                        <span className="font-bebas text-amber-500 tracking-wider text-xl">AI Arena</span>
+                    </div>
+                ) : (
+                    <span className="text-amber-500 text-lg mx-auto">⚡</span>
                 )}
                 <button
                     onClick={() => setCollapsed(c => !c)}
-                    className="p-1.5 rounded-lg hover:bg-surface-low text-secondary hover:text-on-surface transition-colors ml-auto"
+                    className="p-1.5 rounded-lg hover:bg-zinc-800/50 text-zinc-500 hover:text-zinc-300 transition-colors ml-auto"
                     title={collapsed ? 'Expand' : 'Collapse'}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -71,29 +77,30 @@ function ChatSidebar({ activeChatId, onSelectChat, onNewChat, refreshTrigger }) 
                 </button>
             </div>
 
-            {/* New Chat Button */}
-            <div className="p-2 border-b border-surface-highest/20">
+            {/* New Battle Button */}
+            <div className="p-3">
                 <button
                     onClick={onNewChat}
-                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary font-semibold transition-colors text-sm ${collapsed ? 'justify-center' : ''}`}
-                    title="New chat"
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 text-amber-400 font-bebas tracking-[0.1em] transition-all text-xs uppercase cursor-pointer ${collapsed ? 'justify-center' : ''}`}
+                    title="New battle"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 5v14M5 12h14" />
-                    </svg>
-                    {!collapsed && 'New Chat'}
+                    {!collapsed && 'New Battle'}
                 </button>
             </div>
 
             {/* Chat List */}
-            <div className="flex-1 overflow-y-auto py-2 space-y-0.5 px-1">
+            <div className="flex-1 overflow-y-auto py-2 space-y-1 px-2 scrollbar-thin">
+                {!collapsed && (
+                    <span className="text-[10px] font-bold text-amber-500/40 uppercase tracking-[0.2em] px-2 block mb-2">History</span>
+                )}
+                
                 {sidebarLoading ? (
                     <div className="flex justify-center py-8">
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-amber-500" />
                     </div>
                 ) : chats.length === 0 ? (
                     !collapsed && (
-                        <p className="text-center text-xs text-secondary px-3 py-6">No chats yet.<br />Start a battle!</p>
+                        <p className="text-center text-xs text-zinc-500 px-3 py-6 font-outfit">No battles yet.<br />Initiate a challenge!</p>
                     )
                 ) : (
                     chats.map(chat => (
@@ -101,24 +108,35 @@ function ChatSidebar({ activeChatId, onSelectChat, onNewChat, refreshTrigger }) 
                             key={chat._id}
                             onClick={() => onSelectChat(chat._id)}
                             title={chat.title}
-                            className={`w-full text-left flex items-center gap-2 px-2 py-2 rounded-xl transition-colors text-sm group ${activeChatId === chat._id
-                                    ? 'bg-primary/15 text-primary'
-                                    : 'hover:bg-surface-low text-on-surface/80 hover:text-on-surface'
+                            className={`w-full text-left flex items-center gap-2.5 px-3 py-2.5 rounded-xl transition-all duration-200 text-sm group cursor-pointer ${activeChatId === chat._id
+                                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                    : 'hover:bg-zinc-800/40 text-zinc-400 hover:text-zinc-200'
                                 }`}
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 opacity-60">
-                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                            </svg>
-                            {!collapsed && (
+                            {!collapsed ? (
                                 <div className="flex-1 min-w-0">
-                                    <p className="truncate text-xs font-medium">{chat.title}</p>
-                                    <p className="text-[10px] text-secondary mt-0.5">{formatDate(chat.createdAt)}</p>
+                                    <p className="truncate text-xs font-semibold">{chat.title}</p>
+                                    <p className="text-[9px] opacity-40 mt-0.5">{formatDate(chat.createdAt)}</p>
                                 </div>
+                            ) : (
+                                <span className="text-xs mx-auto opacity-60">💬</span>
                             )}
                         </button>
                     ))
                 )}
             </div>
+
+            {/* Sidebar Logout Button */}
+            {!collapsed && (
+                <div className="p-3 border-t border-zinc-800/80">
+                    <button
+                        onClick={() => navigate('/logout')}
+                        className="w-full bg-transparent border border-zinc-800 hover:border-amber-500/60 hover:bg-amber-500/5 text-zinc-300 hover:text-amber-400 font-bebas tracking-[0.15em] text-xs uppercase rounded-xl py-2.5 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                    >
+                        <span>Logout</span>
+                    </button>
+                </div>
+            )}
         </aside>
     );
 }
@@ -166,7 +184,7 @@ export default function Home() {
     const displayData = historyData?.messages?.[0] ?? data;
 
     return (
-        <div className="flex h-screen bg-background text-on-surface font-sans overflow-hidden">
+        <div className="flex h-screen bg-[#0b0c0f] text-on-surface font-outfit overflow-hidden grid-bg">
             {/* Sidebar */}
             <ChatSidebar
                 activeChatId={activeChatId}
@@ -178,117 +196,110 @@ export default function Home() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Top bar */}
-                <header className="flex items-center justify-between px-6 py-3 border-b border-surface-highest/30 bg-surface flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <span className="text-xl">⚡</span>
-                        <span className="font-bold text-on-surface tracking-tight">AI Battle Arena</span>
+                <header className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/80 bg-[#0e1014]/60 backdrop-blur-md flex-shrink-0">
+                    <div className="flex items-center gap-2.5">
+                        <span className="text-amber-500 text-sm">⚖️</span>
+                        <span className="font-bebas text-amber-500 tracking-[0.2em] text-sm uppercase">Battle Arena </span>
                     </div>
                     <div className="flex items-center gap-3">
                         {user && (
-                            <span className="text-xs text-secondary font-medium hidden sm:block">
+                            <span className="text-xs text-zinc-400 font-semibold tracking-wider bg-zinc-900/80 px-3.5 py-1.5 rounded-xl border border-zinc-800/80 hidden sm:block">
                                 {user.username || user.displayName}
                             </span>
                         )}
-                        <button
-                            onClick={() => navigate('/logout')}
-                            className="text-sm font-semibold text-secondary hover:text-red-400 transition-colors flex items-center gap-1.5 bg-surface-low px-3 py-1.5 rounded-xl border border-surface-highest/30 hover:border-red-500/30 hover:bg-red-500/10"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                                <polyline points="16 17 21 12 16 7" />
-                                <line x1="21" y1="12" x2="9" y2="12" />
-                            </svg>
-                            Logout
-                        </button>
                     </div>
                 </header>
 
                 {/* Scrollable content area */}
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 pb-36">
-                    <div className="max-w-5xl mx-auto space-y-8">
+                <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-36 scrollbar-thin">
+                    <div className="max-w-5xl mx-auto space-y-6">
 
                         {(loading || historyLoading) && (
-                            <div className="flex justify-center items-center py-20">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+                            <div className="flex justify-center items-center py-24">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500" />
                             </div>
                         )}
 
                         {error && !loading && (
-                            <div className="text-center py-12 text-red-400 bg-surface rounded-2xl">
-                                <p className="text-xl font-semibold">Error</p>
-                                <p className="text-sm mt-1">{typeof error === 'string' ? error : 'Failed to load data.'}</p>
+                            <div className="text-center py-12 text-red-400 bg-[#121418] border border-red-500/20 rounded-2xl shadow-lg">
+                                <p className="text-xl font-bold font-bebas tracking-wide">SYSTEM ERROR</p>
+                                <p className="text-sm mt-1 text-zinc-400">{typeof error === 'string' ? error : 'Failed to retrieve arena telemetry.'}</p>
                             </div>
                         )}
 
                         {displayData && !loading && !historyLoading && (
                             <>
-                                <header className="bg-surface rounded-2xl p-6 md:p-8 shadow-[0_12px_40px_rgba(26,28,29,0.06)] relative">
-                                    <div className="flex justify-between items-start mb-4">
-                                        <div className="inline-flex items-center space-x-2 bg-surface-low px-3 py-1 rounded-full">
-                                            <span className="w-2 h-2 rounded-full bg-primary" />
-                                            <span className="text-xs font-semibold text-secondary uppercase tracking-wider">Problem Statement</span>
-                                        </div>
+                                {/* Problem Statement Card */}
+                                <header className="bg-[#121418] rounded-xl border border-amber-500/20 p-5 shadow-[0_4px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(234,179,8,0.05)] flex items-center gap-4 relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-[2px] bg-amber-500/30" />
+                                    <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 px-3 py-1.5 rounded-lg text-[10px] font-bold tracking-widest uppercase flex-shrink-0">
+                                        Problem Statement
                                     </div>
-                                    <h1 className="text-2xl md:text-3xl font-medium tracking-tight text-on-surface">
+                                    <h1 className="font-bebas text-2xl tracking-wide text-zinc-100 flex-1 uppercase">
                                         {displayData?.problem}
                                     </h1>
                                 </header>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                                    <section className="bg-surface rounded-2xl shadow-[0_12px_40px_rgba(26,28,29,0.06)] overflow-hidden flex flex-col h-full">
-                                        <div className="p-6 md:p-8 border-b border-surface-highest/50 bg-gradient-to-br from-surface to-surface-low">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <h2 className="text-xl font-semibold">Model A</h2>
-                                                <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">
-                                                    Score: {displayData?.judgement?.solution_1_score}/10
-                                                </div>
+                                {/* Model Response Columns */}
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+                                    {/* Model A Card */}
+                                    <section className="bg-[#121418] rounded-xl border border-amber-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(234,179,8,0.03)] overflow-hidden flex flex-col h-full relative">
+                                        <div className="absolute top-0 left-0 w-full h-[3px] bg-amber-500" />
+                                        <div className="px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/40 flex justify-between items-center mt-[3px]">
+                                            <h2 className="text-2xl font-bebas text-amber-500 tracking-wider uppercase">Model A</h2>
+                                            <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-3 py-1 rounded-full text-xs">
+                                                Score: {displayData?.judgement?.solution_1_score}/10
                                             </div>
                                         </div>
-                                        <div className="p-6 md:p-8 overflow-y-auto max-h-[600px] flex-grow">
+                                        <div className="p-5 md:p-6 overflow-y-auto max-h-[500px] flex-grow text-zinc-300 text-sm leading-relaxed scrollbar-thin">
                                             <FormattedText text={displayData?.solution_1} />
                                         </div>
                                     </section>
 
-                                    <section className="bg-surface rounded-2xl shadow-[0_12px_40px_rgba(26,28,29,0.06)] overflow-hidden flex flex-col h-full">
-                                        <div className="p-6 md:p-8 border-b border-surface-highest/50 bg-gradient-to-br from-surface to-surface-low">
-                                            <div className="flex justify-between items-center mb-2">
-                                                <h2 className="text-xl font-semibold">Model B</h2>
-                                                <div className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-bold">
-                                                    Score: {displayData?.judgement?.solution_2_score}/10
-                                                </div>
+                                    {/* Model B Card */}
+                                    <section className="bg-[#121418] rounded-xl border border-blue-500/20 shadow-[0_4px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(59,130,246,0.03)] overflow-hidden flex flex-col h-full relative">
+                                        <div className="absolute top-0 left-0 w-full h-[3px] bg-blue-500" />
+                                        <div className="px-5 py-4 border-b border-zinc-800/80 bg-zinc-900/40 flex justify-between items-center mt-[3px]">
+                                            <h2 className="text-2xl font-bebas text-blue-400 tracking-wider uppercase">Model B</h2>
+                                            <div className="bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold px-3 py-1 rounded-full text-xs">
+                                                Score: {displayData?.judgement?.solution_2_score}/10
                                             </div>
                                         </div>
-                                        <div className="p-6 md:p-8 overflow-y-auto max-h-[600px] flex-grow">
+                                        <div className="p-5 md:p-6 overflow-y-auto max-h-[500px] flex-grow text-zinc-300 text-sm leading-relaxed scrollbar-thin">
                                             <FormattedText text={displayData?.solution_2} />
                                         </div>
                                     </section>
                                 </div>
 
-                                <section className="bg-surface rounded-2xl p-6 md:p-8 shadow-[0_12px_40px_rgba(26,28,29,0.06)]">
-                                    <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-                                        <span className="text-2xl">⚖️</span>
+                                {/* Judge's Verdict Card */}
+                                <section className="bg-[#121418] rounded-xl border border-amber-500/20 p-6 shadow-[0_4px_30px_rgba(0,0,0,0.4),0_0_20px_rgba(234,179,8,0.05)] relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-[2px] bg-amber-500/30" />
+                                    <h2 className="text-2xl font-bebas tracking-wider text-amber-500 mb-6 flex items-center gap-2">
+                                        <span className="text-xl">⚖️</span>
                                         Judge's Verdict
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="bg-surface-low rounded-xl p-5 border border-surface-highest/30 flex flex-col">
+                                        {/* Model A Reasoning */}
+                                        <div className="bg-zinc-900/40 rounded-xl p-5 border border-zinc-800/80 flex flex-col">
                                             <div className="flex justify-between items-center mb-4">
-                                                <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">Model A Reasoning</h3>
-                                                <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold shadow-sm">
-                                                    Score: {displayData?.judgement?.solution_1_score}/10
+                                                <h3 className="text-[10px] font-bold text-amber-500/70 tracking-widest uppercase">Model A Reasoning</h3>
+                                                <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                                                    {displayData?.judgement?.solution_1_score}/10
                                                 </div>
                                             </div>
-                                            <p className="text-sm md:text-base leading-relaxed text-on-surface/90 flex-grow">
+                                            <p className="text-xs md:text-sm leading-relaxed text-zinc-400 flex-grow font-outfit">
                                                 {displayData?.judgement?.solution_1_reasoning}
                                             </p>
                                         </div>
-                                        <div className="bg-surface-low rounded-xl p-5 border border-surface-highest/30 flex flex-col">
+                                        {/* Model B Reasoning */}
+                                        <div className="bg-zinc-900/40 rounded-xl p-5 border border-zinc-800/80 flex flex-col">
                                             <div className="flex justify-between items-center mb-4">
-                                                <h3 className="text-sm font-bold text-secondary uppercase tracking-wider">Model B Reasoning</h3>
-                                                <div className="bg-primary/20 text-primary px-3 py-1 rounded-full text-sm font-bold shadow-sm">
-                                                    Score: {displayData?.judgement?.solution_2_score}/10
+                                                <h3 className="text-[10px] font-bold text-blue-400/70 tracking-widest uppercase">Model B Reasoning</h3>
+                                                <div className="bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold px-2.5 py-0.5 rounded-full text-[10px]">
+                                                    {displayData?.judgement?.solution_2_score}/10
                                                 </div>
                                             </div>
-                                            <p className="text-sm md:text-base leading-relaxed text-on-surface/90 flex-grow">
+                                            <p className="text-xs md:text-sm leading-relaxed text-zinc-400 flex-grow font-outfit">
                                                 {displayData?.judgement?.solution_2_reasoning}
                                             </p>
                                         </div>
@@ -298,9 +309,10 @@ export default function Home() {
                         )}
 
                         {!displayData && !loading && !historyLoading && !error && (
-                            <div className="text-center py-20 bg-surface rounded-2xl shadow-[0_12px_40px_rgba(26,28,29,0.06)]">
-                                <h2 className="text-3xl font-bold text-on-surface mb-4">Welcome to AI Battle Arena ⚔️</h2>
-                                <p className="text-on-surface/70 max-w-lg mx-auto">
+                            <div className="text-center py-20 bg-[#121418] rounded-xl border border-zinc-800/80 shadow-[0_12px_40px_rgba(0,0,0,0.5)] max-w-2xl mx-auto p-8 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-amber-500/10 via-amber-500/40 to-amber-500/10" />
+                                <h2 className="text-3xl font-bebas text-amber-500 tracking-wide mb-4">Welcome to AI Battle Arena ⚔️</h2>
+                                <p className="text-zinc-400 text-sm max-w-lg mx-auto leading-relaxed">
                                     Enter a prompt below to see two AI models compete in solving your problem. Our judge will evaluate both solutions and determine the winner!
                                 </p>
                             </div>
@@ -309,27 +321,27 @@ export default function Home() {
                 </div>
 
                 {/* Chat Input Fixed Footer */}
-                <div className="flex-shrink-0 p-4 md:p-6 bg-gradient-to-t from-background via-background/95 to-transparent border-t border-surface-highest/20">
+                <div className="flex-shrink-0 p-4 md:p-6 bg-gradient-to-t from-[#0b0c0f] via-[#0b0c0f]/95 to-transparent border-t border-zinc-900/80">
                     <div className="max-w-3xl mx-auto">
                         <form
                             onSubmit={handleSubmit}
-                            className="relative flex items-center bg-surface-low rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-surface-highest overflow-hidden p-2"
+                            className="relative flex items-center bg-zinc-950/80 rounded-2xl border border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(0,0,0,0.8)] overflow-hidden p-2"
                         >
                             <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="Ask the models a question..."
-                                className="w-full bg-transparent border-none outline-none text-on-surface px-4 py-3 placeholder:text-secondary focus:ring-0"
+                                className="w-full bg-transparent border-none outline-none text-zinc-100 px-4 py-3 placeholder:text-zinc-600 focus:ring-0 text-sm font-outfit"
                                 disabled={loading}
                             />
                             <button
                                 type="submit"
                                 disabled={!input.trim() || loading}
-                                className="p-3 mr-1 bg-primary text-white rounded-xl hover:bg-primary-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
+                                className="p-3 mr-1 bg-zinc-900 hover:bg-zinc-800 text-amber-500 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/40 rounded-xl disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 flex-shrink-0 cursor-pointer"
                             >
                                 {loading ? (
-                                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <svg className="animate-spin h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>

@@ -1,20 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0f1115;
-  --color-surface: #1a1d21;
-  --color-surface-low: #23272b;
-  --color-surface-highest: #2d3238;
-  --color-primary: #3b82f6;
-  --color-primary-container: #1d4ed8;
+  --color-background: #0b0c0f;
+  --color-surface: #121418;
+  --color-surface-low: #1a1d22;
+  --color-surface-highest: #262a31;
+  --color-primary: #eab308; /* Changed to amber gold */
+  --color-primary-container: #ca8a04;
   --color-on-surface: #f3f4f6;
   --color-secondary: #9ca3af;
+  
+  --font-bebas: "Bebas Neue", sans-serif;
+  --font-outfit: "Outfit", sans-serif;
 }
 
 body {
   background-color: var(--color-background);
   color: var(--color-on-surface);
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+
+.grid-bg {
+  background-image: 
+    linear-gradient(to right, rgba(234, 179, 8, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(234, 179, 8, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-color: #0b0c0f;
+}
+
+/* Custom global scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0b0c0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(234, 179, 8, 0.15);
+  border: 1px solid rgba(234, 179, 8, 0.08);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(234, 179, 8, 0.45);
+}
+
+/* Firefox scrollbar styles */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(234, 179, 8, 0.15) #0b0c0f;
+}
+
+

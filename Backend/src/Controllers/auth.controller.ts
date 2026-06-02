@@ -150,7 +150,19 @@ export const GoogleAuthCallback = (req: Request, res: Response) => {
     );
   }
 
-  // User is already authenticated by Passport and session is set
+  const user = req.user as any;
+  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
+    expiresIn: "1h",
+  });
+
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 60 * 60 * 1000, // 1 hour
+  });
+
   res.redirect(
     `${process.env.FRONTEND_URL || "http://localhost:5173"}/home?oauth=success`,
   );
