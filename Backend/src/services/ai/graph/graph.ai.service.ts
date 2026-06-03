@@ -1,27 +1,22 @@
-import {StateSchema,StateGraph,START,END,} from "@langchain/langgraph";
+import { StateSchema, StateGraph, START, END } from "@langchain/langgraph";
 import type { GraphNode } from "@langchain/langgraph";
 import { HumanMessage } from "@langchain/core/messages";
 import z from "zod";
 import { geminiModel, mistralModel, cohereModel } from "../model.service.js";
-import {State} from "./state.js";
+import { State } from "./state.js";
 import { fileProcessingNode } from "../nodes/file-processing.node.js";
-
-
-
+import { chunkingNode } from "../nodes/chunking.node.js";
+import { embeddingNode } from "../nodes/embedding.node.js";
 
 const solutionNode: GraphNode<typeof State> = async (state) => {
-
   const prompt = `
-You are given file context extracted from an uploaded document.
+You are answering questions about an uploaded document. 
 
-Use ONLY the provided file context to answer the user's question.
+Use ONLY the provided context. 
 
-FILE CONTEXT:
-${state.extracted_text}
+CONTEXT: ${state.chunks.join("\n\n")} 
 
-QUESTION:
-${state.problem}
-`;
+QUESTION: ${state.problem} `;
 
   const [mistralResponse, cohereResponse] = await Promise.all([
     mistralModel.invoke(prompt),
@@ -33,8 +28,6 @@ ${state.problem}
     solution_2: cohereResponse.text,
   };
 };
-
-
 
 const judgementNode: GraphNode<typeof State> = async (state) => {
   const { problem, solution_1, solution_2 } = state;
@@ -76,11 +69,15 @@ const judgementNode: GraphNode<typeof State> = async (state) => {
 };
 
 const graph = new StateGraph(State)
-  .addNode("file_processing",fileProcessingNode)
+  .addNode("file_processing", fileProcessingNode)
+  .addNode("chunking", chunkingNode)
+  .addNode("embedding", embeddingNode)
   .addNode("solution", solutionNode)
   .addNode("judgement_node", judgementNode)
   .addEdge(START, "file_processing")
-  .addEdge("file_processing","solution")
+  .addEdge("file_processing", "chunking")
+  .addEdge("chunking", "embedding")
+  .addEdge("embedding", "solution")
   .addEdge("solution", "judgement_node")
   .addEdge("judgement_node", END)
   .compile();
@@ -92,7 +89,6 @@ export default async function ({
   problem: string;
   uploaded_file_path?: string;
 }) {
-
   const results = await graph.invoke({
     problem,
     uploaded_file_path,
@@ -100,4 +96,3 @@ export default async function ({
 
   return results;
 }
-

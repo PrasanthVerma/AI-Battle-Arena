@@ -12,6 +12,8 @@ export const State = new StateSchema({
 
   retrieved_context: z.array(z.string()).default([]),
 
+  chunks:z.array(z.string()).default([]),
+
   solution_1: z.string().default(""),
   solution_2: z.string().default(""),
   judgement: z.object({
