@@ -14,6 +14,8 @@ export const State = new StateSchema({
 
   chunks:z.array(z.string()).default([]),
 
+  pinecone_namespace: z.string().default(""),
+
   solution_1: z.string().default(""),
   solution_2: z.string().default(""),
   judgement: z.object({

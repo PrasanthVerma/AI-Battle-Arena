@@ -7,17 +7,15 @@ import { State } from "./state.js";
 import { fileProcessingNode } from "../nodes/file-processing.node.js";
 import { chunkingNode } from "../nodes/chunking.node.js";
 import { embeddingNode } from "../nodes/embedding.node.js";
+import { retrievalNode } from "../nodes/retrieval.node.js";
 
 const solutionNode: GraphNode<typeof State> = async (state) => {
-  const prompt = `
-You are answering questions about an uploaded document. 
-
-Use ONLY the provided context. 
-
-CONTEXT: ${state.chunks.join("\n\n")} 
-
-QUESTION: ${state.problem} `;
-
+  const prompt = ` You are answering questions about an uploaded document. Use ONLY the provided context. 
+  If the answer is not found in the context, say you could not find enough information. 
+  
+  CONTEXT: ${state.retrieved_context.join("\n\n")} 
+  
+  QUESTION: ${state.problem} `;
   const [mistralResponse, cohereResponse] = await Promise.all([
     mistralModel.invoke(prompt),
     cohereModel.invoke(prompt),
@@ -72,12 +70,14 @@ const graph = new StateGraph(State)
   .addNode("file_processing", fileProcessingNode)
   .addNode("chunking", chunkingNode)
   .addNode("embedding", embeddingNode)
+  .addNode("retrieval", retrievalNode)
   .addNode("solution", solutionNode)
   .addNode("judgement_node", judgementNode)
   .addEdge(START, "file_processing")
   .addEdge("file_processing", "chunking")
   .addEdge("chunking", "embedding")
-  .addEdge("embedding", "solution")
+  .addEdge("embedding", "retrieval")
+  .addEdge("retrieval", "solution")
   .addEdge("solution", "judgement_node")
   .addEdge("judgement_node", END)
   .compile();
