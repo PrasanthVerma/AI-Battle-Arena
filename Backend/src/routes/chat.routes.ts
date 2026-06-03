@@ -1,7 +1,10 @@
 import express from "express";
 import { GetChatsController, GetChatMessagesController } from "../Controllers/chat.controller.js";
+import multer from "multer";
 
 const router = express.Router();
+
+
 
 router.get("/", GetChatsController);
 router.get("/:chatId", GetChatMessagesController);

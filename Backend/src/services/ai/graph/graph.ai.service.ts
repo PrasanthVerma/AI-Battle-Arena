@@ -2,33 +2,39 @@ import {StateSchema,StateGraph,START,END,} from "@langchain/langgraph";
 import type { GraphNode } from "@langchain/langgraph";
 import { HumanMessage } from "@langchain/core/messages";
 import z from "zod";
-import { geminiModel, mistralModel, cohereModel } from "./model.service.js";
+import { geminiModel, mistralModel, cohereModel } from "../model.service.js";
+import {State} from "./state.js";
+import { fileProcessingNode } from "../nodes/file-processing.node.js";
 
-const State = new StateSchema({
-  problem: z.string().default(""),
-  solution_1: z.string().default(""),
-  solution_2: z.string().default(""),
-  judgement: z.object({
-    solution_1_score: z.number().default(0),
-    solution_2_score: z.number().default(0),
-    solution_1_reasoning: z.string().default(""),
-    solution_2_reasoning: z.string().default(""),
-  }),
-});
+
+
 
 const solutionNode: GraphNode<typeof State> = async (state) => {
 
+  const prompt = `
+You are given file context extracted from an uploaded document.
+
+Use ONLY the provided file context to answer the user's question.
+
+FILE CONTEXT:
+${state.extracted_text}
+
+QUESTION:
+${state.problem}
+`;
+
   const [mistralResponse, cohereResponse] = await Promise.all([
-    mistralModel.invoke(state.problem),
-    cohereModel.invoke(state.problem),
+    mistralModel.invoke(prompt),
+    cohereModel.invoke(prompt),
   ]);
 
   return {
     solution_1: mistralResponse.text,
     solution_2: cohereResponse.text,
   };
-
 };
+
+
 
 const judgementNode: GraphNode<typeof State> = async (state) => {
   const { problem, solution_1, solution_2 } = state;
@@ -70,16 +76,28 @@ const judgementNode: GraphNode<typeof State> = async (state) => {
 };
 
 const graph = new StateGraph(State)
+  .addNode("file_processing",fileProcessingNode)
   .addNode("solution", solutionNode)
   .addNode("judgement_node", judgementNode)
-  .addEdge(START, "solution")
+  .addEdge(START, "file_processing")
+  .addEdge("file_processing","solution")
   .addEdge("solution", "judgement_node")
   .addEdge("judgement_node", END)
   .compile();
 
-export default async function (problem: string) {
+export default async function ({
+  problem,
+  uploaded_file_path,
+}: {
+  problem: string;
+  uploaded_file_path?: string;
+}) {
+
   const results = await graph.invoke({
-    problem: problem,
+    problem,
+    uploaded_file_path,
   });
+
   return results;
 }
+

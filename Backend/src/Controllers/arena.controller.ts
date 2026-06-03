@@ -1,6 +1,6 @@
 import chat from "../Models/chat.model.js";
 import message from "../Models/messages.model.js";
-import useGraph from "../services/graph.ai.service.js";
+import useGraph from "../services/ai/graph/graph.ai.service.js";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
@@ -53,5 +53,41 @@ export const ArenaController = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Error in ArenaController:", err);
     return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const battleWithFileController = async (req: Request, res: Response) => {
+
+  console.log(req.file)
+  try {
+    const problem = req.body.problem;
+    if (!problem) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Problem is required" });
+    }
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "File is required" });
+    }
+    const result = await useGraph({
+      problem,
+      uploaded_file_path: req.file.path,
+    });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        extracted_text: result.extracted_text,
+        solution_1: result.solution_1,
+        solution_2: result.solution_2,
+        judgement: result.judgement,
+      });
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
