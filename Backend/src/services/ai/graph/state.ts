@@ -4,6 +4,8 @@ import { StateSchema } from "@langchain/langgraph";
 export const State = new StateSchema({
   problem: z.string().default(""),
 
+  sendEvent : z.any().optional(),
+  
   uploaded_file_type: z.string().default(""),
 
   uploaded_file_path: z.string().optional(),

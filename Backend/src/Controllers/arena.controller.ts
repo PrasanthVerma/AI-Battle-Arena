@@ -4,10 +4,22 @@ import useGraph from "../services/ai/graph/graph.ai.service.js";
 import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-export const ArenaController = async (req: Request, res: Response) => {
+export const ArenaController = async (
+  req: Request,
+  res: Response,
+) => {
   try {
-    const { problem } = req.body;
+    const { problem, chatId, stream } =
+      req.body;
+
+    if (!problem) {
+      return res.status(400).json({
+        message: "Problem is required",
+      });
+    }
+
     let userId;
+
     if (req.user) {
       userId = (req.user as any)._id;
     } else if (req.cookies.token) {
@@ -15,79 +27,259 @@ export const ArenaController = async (req: Request, res: Response) => {
         const decoded = jwt.verify(
           req.cookies.token,
           process.env.JWT_SECRET!,
-        ) as { userId: string };
+        ) as {
+          userId: string;
+        };
+
         userId = decoded.userId;
-      } catch (err) {
-        return res.status(401).json({ message: "Invalid token" });
+      } catch {
+        return res.status(401).json({
+          message: "Invalid token",
+        });
       }
     }
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
 
-    const result = await useGraph(problem);
-    const newChat = await chat.create({
-      userId: userId,
-      title: problem,
-    });
+    // =========================
+    // STREAMING MODE
+    // =========================
 
-    const newMessage = await message.create({
-      chatId: newChat._id,
-      problem: problem,
-      solution_1: result.solution_1,
-      solution_2: result.solution_2,
-      judgement: {
-        solution_1_score: result.judgement.solution_1_score,
-        solution_2_score: result.judgement.solution_2_score,
-        solution_1_reasoning: result.judgement.solution_1_reasoning,
-        solution_2_reasoning: result.judgement.solution_2_reasoning,
-      },
-    });
+    if (
+      stream === true ||
+      stream === "true"
+    ) {
+
+      res.setHeader(
+        "Content-Type",
+        "text/event-stream",
+      );
+
+      res.setHeader(
+        "Cache-Control",
+        "no-cache",
+      );
+
+      res.setHeader(
+        "Connection",
+        "keep-alive",
+      );
+
+      res.flushHeaders?.();
+
+      const sendEvent = (
+        event: string,
+        data: unknown,
+      ) => {
+
+        res.write(
+          `event: ${event}\n`,
+        );
+
+        res.write(
+          `data: ${JSON.stringify(data)}\n\n`,
+        );
+      };
+
+      try {
+
+        const result =
+          await useGraph({
+            problem,
+
+            uploaded_file_path:
+              req.file?.path,
+
+            sendEvent,
+          });
+
+        let targetChatId =
+          chatId;
+
+        if (targetChatId) {
+
+          const existingChat =
+            await chat.findOne({
+              _id: targetChatId,
+              userId,
+            });
+
+          if (!existingChat) {
+            targetChatId = null;
+          }
+        }
+
+        if (!targetChatId) {
+
+          const newChat =
+            await chat.create({
+              userId,
+              title: problem,
+            });
+
+          targetChatId =
+            newChat._id;
+        }
+
+        const newMessage =
+          await message.create({
+            chatId:
+              targetChatId,
+
+            problem,
+
+            solution_1:
+              result.solution_1,
+
+            solution_2:
+              result.solution_2,
+
+            judgement: {
+              solution_1_score:
+                result.judgement
+                  .solution_1_score,
+
+              solution_2_score:
+                result.judgement
+                  .solution_2_score,
+
+              solution_1_reasoning:
+                result.judgement
+                  .solution_1_reasoning,
+
+              solution_2_reasoning:
+                result.judgement
+                  .solution_2_reasoning,
+            },
+          });
+
+        sendEvent(
+          "complete",
+          {
+            ...result,
+
+            chatId:
+              targetChatId,
+
+            messageId:
+              newMessage._id,
+          },
+        );
+
+        res.end();
+
+        return;
+      } catch (error) {
+
+        sendEvent(
+          "error",
+          error instanceof Error
+            ? error.message
+            : "Unknown error",
+        );
+
+        res.end();
+
+        return;
+      }
+    }
+
+    // =========================
+    // NORMAL MODE
+    // =========================
+
+    const result =
+      await useGraph({
+        problem,
+
+        uploaded_file_path:
+          req.file?.path,
+      });
+
+    let targetChatId =
+      chatId;
+
+    if (targetChatId) {
+
+      const existingChat =
+        await chat.findOne({
+          _id: targetChatId,
+          userId,
+        });
+
+      if (!existingChat) {
+        targetChatId = null;
+      }
+    }
+
+    if (!targetChatId) {
+
+      const newChat =
+        await chat.create({
+          userId,
+          title: problem,
+        });
+
+      targetChatId =
+        newChat._id;
+    }
+
+    const newMessage =
+      await message.create({
+        chatId:
+          targetChatId,
+
+        problem,
+
+        solution_1:
+          result.solution_1,
+
+        solution_2:
+          result.solution_2,
+
+        judgement: {
+          solution_1_score:
+            result.judgement
+              .solution_1_score,
+
+          solution_2_score:
+            result.judgement
+              .solution_2_score,
+
+          solution_1_reasoning:
+            result.judgement
+              .solution_1_reasoning,
+
+          solution_2_reasoning:
+            result.judgement
+              .solution_2_reasoning,
+        },
+      });
 
     return res.status(200).json({
       ...result,
-      chatId: newChat._id,
-      messageId: newMessage._id,
+
+      chatId:
+        targetChatId,
+
+      messageId:
+        newMessage._id,
     });
+
   } catch (err) {
-    console.error("Error in ArenaController:", err);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-};
 
-export const battleWithFileController = async (req: Request, res: Response) => {
+    console.error(
+      "Error in ArenaController:",
+      err,
+    );
 
-  console.log(req.file)
-  try {
-    const problem = req.body.problem;
-    if (!problem) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Problem is required" });
-    }
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "File is required" });
-    }
-    const result = await useGraph({
-      problem,
-      uploaded_file_path: req.file.path,
+    return res.status(500).json({
+      message:
+        "Internal server error",
     });
-    return res
-      .status(200)
-      .json({
-        success: true,
-        extracted_text: result.extracted_text,
-        solution_1: result.solution_1,
-        solution_2: result.solution_2,
-        judgement: result.judgement,
-      });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
   }
 };
