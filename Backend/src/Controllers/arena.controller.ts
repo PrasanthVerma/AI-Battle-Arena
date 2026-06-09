@@ -92,7 +92,7 @@ export const ArenaController = async (
             problem,
 
             uploaded_file_path:
-              req.file?.path,
+              (req as any).file?.path,
 
             sendEvent,
           });
@@ -197,7 +197,7 @@ export const ArenaController = async (
         problem,
 
         uploaded_file_path:
-          req.file?.path,
+          (req as any).file?.path,
       });
 
     let targetChatId =

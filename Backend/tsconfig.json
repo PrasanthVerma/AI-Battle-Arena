@@ -12,7 +12,7 @@
     "target": "esnext",
     // Omitting 'types' lets TypeScript auto-discover all @types/* packages
     "lib": ["esnext", "dom"],
-    "types": ["node"],  
+    "types": ["node", "multer"],  
 
     // Other Outputs
     "sourceMap": true,

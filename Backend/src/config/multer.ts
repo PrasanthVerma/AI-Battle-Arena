@@ -11,17 +11,17 @@ if (!fs.existsSync(uploadPath)) {
 }
 
 const storage = multer.diskStorage({
-  destination: (_, __, cb) => {
+  destination: (req: any, file: any, cb: any) => {
     cb(null, uploadPath);
   },
 
-  filename: (_, file, cb) => {
+  filename: (req: any, file: any, cb: any) => {
     const uniqueName = `${uuidv4()}-${file.originalname}`;
     cb(null, uniqueName);
   },
 });
 
-const fileFilter: multer.Options["fileFilter"] = (_, file, cb) => {
+const fileFilter: any = (req: any, file: any, cb: any) => {
   const allowedMimeTypes = [
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
