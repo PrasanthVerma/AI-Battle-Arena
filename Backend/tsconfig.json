@@ -4,13 +4,15 @@
     // File Layout
     "rootDir": ".",
     "outDir": "./dist",
+  
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
     // Omitting 'types' lets TypeScript auto-discover all @types/* packages
-    "lib": ["esnext"],
+    "lib": ["esnext", "dom"],
+    "types": ["node"],  
 
     // Other Outputs
     "sourceMap": true,

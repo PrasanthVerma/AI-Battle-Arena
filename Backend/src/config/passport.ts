@@ -29,7 +29,7 @@ passport.use(
       usernameField: "email",
       passwordField: "password",
     },
-    async (email, password, done) => {
+    async (email, password, done: any) => {
       try {
         const user = await User.findOne({ email });
 
@@ -68,7 +68,7 @@ passport.use(
         process.env.GOOGLE_CALLBACK_URL ||
         "http://localhost:3000/api/auth/google/callback",
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken: string, refreshToken: string, profile: any, done: any) => {
       try {
         // Check if user exists by Google ID
         let user = await User.findOne({ googleId: profile.id });
@@ -116,11 +116,11 @@ passport.use(
 );
 
 // ========== SESSION SERIALIZATION ==========
-passport.serializeUser((user: Express.User, done) => {
+passport.serializeUser((user: Express.User, done: any) => {
   done(null, user._id);
 });
 
-passport.deserializeUser(async (id: string, done) => {
+passport.deserializeUser(async (id: string, done: any) => {
   try {
     const user = await User.findById(id);
     done(null, user);
