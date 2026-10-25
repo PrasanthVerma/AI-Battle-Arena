@@ -20,7 +20,7 @@ export const Redisclient = createClient({
   socket: {
     // redis v5: connectTimeout must be inside socket (ms)
     connectTimeout: 10000,
-    keepAlive: 5000,
+    keepAlive: true,
     ...(useTLS && { rejectUnauthorized: false }),
     reconnectStrategy: (retries: number) => {
       if (retries > 5) {
