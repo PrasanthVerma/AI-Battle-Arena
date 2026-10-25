@@ -174,13 +174,20 @@ export const ArenaController = async (
 
         return;
       } catch (error) {
+        const isRateLimit =
+          error instanceof Error &&
+          (error.message.toLowerCase().includes("rate limit") ||
+            error.message.includes("429") ||
+            (error as any).status === 429);
 
-        sendEvent(
-          "error",
-          error instanceof Error
-            ? error.message
-            : "Unknown error",
-        );
+        sendEvent("error", {
+          message: isRateLimit
+            ? "Model A is temporarily rate-limited. Please wait a moment and try again."
+            : error instanceof Error
+              ? error.message
+              : "Unknown error",
+          code: isRateLimit ? "rate_limited" : "unknown",
+        });
 
         res.end();
 

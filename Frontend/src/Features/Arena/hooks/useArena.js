@@ -126,9 +126,17 @@ const useArena = () => {
 
                                 dispatch(
                                     setError(
-                                        data
+                                        typeof data === "string"
+                                            ? data
+                                            : data?.message ?? "An error occurred. Please try again."
                                     )
                                 );
+
+                                // Clear any partial stream content so
+                                // the UI doesn't flash half-rendered results
+                                dispatch(resetStream());
+                                dispatch(setLoading(false));
+                                dispatch(setStreaming(false));
 
                                 break;
 

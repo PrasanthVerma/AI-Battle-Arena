@@ -5,12 +5,48 @@ import z from "zod";
 
 import { State } from "./state.js";
 
-import { geminiModel, mistralModel, cohereModel } from "../model.service.js";
+import { geminiModel, openrouterModel, cohereModel } from "../model.service.js";
 
 import { fileProcessingNode } from "../nodes/file-processing.node.js";
 import { chunkingNode } from "../nodes/chunking.node.js";
 import { embeddingNode } from "../nodes/embedding.node.js";
 import { retrievalNode } from "../nodes/retrieval.node.js";
+
+// ---------------------------------------------------------------------------
+// Retry helper — retries on Mistral / Cohere rate-limit (HTTP 429) errors.
+// ---------------------------------------------------------------------------
+const isRateLimitError = (err: unknown): boolean => {
+  if (!err || typeof err !== "object") return false;
+  const e = err as Record<string, unknown>;
+  // Mistral SDK surfaces status on the error object
+  if (e.status === 429 || e.statusCode === 429) return true;
+  // Some SDKs embed it in a nested response
+  const body = e.body as Record<string, unknown> | undefined;
+  if (body?.code === "1300") return true;
+  const msg = String(e.message ?? "");
+  return msg.toLowerCase().includes("rate limit") || msg.includes("429");
+};
+
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 2000,
+): Promise<T> {
+  let attempt = 0;
+  while (true) {
+    try {
+      return await fn();
+    } catch (err) {
+      attempt++;
+      if (!isRateLimitError(err) || attempt >= maxAttempts) throw err;
+      const delay = baseDelayMs * Math.pow(2, attempt - 1); // 2s, 4s, 8s …
+      console.warn(
+        `[Retry] Rate-limit hit, waiting ${delay}ms before attempt ${attempt + 1}/${maxAttempts}…`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
 
 const solutionNode: GraphNode<typeof State> = async (state) => {
   const prompt =
@@ -35,25 +71,27 @@ ${state.problem}
 
   let solution1 = "";
   let solution2 = "";
-  const mistralTask = async () => {
+  // Model 1: OpenRouter — wrapped with retry on rate-limit
+  const geminiFlashTask = async () => {
     state.sendEvent?.("model_1_start", null);
-    const stream = await mistralModel.stream(prompt);
+    const stream = await withRetry(() => openrouterModel.stream(prompt));
     for await (const chunk of stream) {
       const text = typeof chunk.content === "string" ? chunk.content : "";
       solution1 += text;
       state.sendEvent?.("model_1_chunk", text);
     }
   };
+  // Model 2: Cohere Command-A — wrapped with retry on rate-limit
   const cohereTask = async () => {
     state.sendEvent?.("model_2_start", null);
-    const stream = await cohereModel.stream(prompt);
+    const stream = await withRetry(() => cohereModel.stream(prompt));
     for await (const chunk of stream) {
       const text = typeof chunk.content === "string" ? chunk.content : "";
       solution2 += text;
       state.sendEvent?.("model_2_chunk", text);
     }
   };
-  await Promise.all([mistralTask(), cohereTask()]);
+  await Promise.all([geminiFlashTask(), cohereTask()]);
   return { solution_1: solution1, solution_2: solution2 };
 };
 
@@ -63,9 +101,9 @@ const judgementNode: GraphNode<typeof State> = async (state) => {
 
   const structuredGemini = geminiModel.withStructuredOutput(
     z.object({
-      solution_1_score: z.number().min(0).max(10),
+      solution_1_score: z.number().gte(0).lte(10),
 
-      solution_2_score: z.number().min(0).max(10),
+      solution_2_score: z.number().gte(0).lte(10),
 
       solution_1_reasoning: z.string(),
 

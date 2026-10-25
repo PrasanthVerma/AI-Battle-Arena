@@ -16,16 +16,8 @@ export const embeddingNode: GraphNode<typeof State> =
 
     const namespace = `battle-${uuidv4()}`;
 
-    const testVector =
-  await cohereEmbeddings.embedQuery(
-    "Hello world"
-  );
+   
 
-console.log("Vector Length:", testVector.length);
-console.log(
-  "First 5 values:",
-  testVector.slice(0, 5)
-);
 
     await PineconeStore.fromTexts(
       state.chunks,

@@ -356,6 +356,7 @@ export default function Home() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!input.trim() && !selectedFile) return;
+        if(loading) return ;
 
         const currentChatId = activeChatId;
 
@@ -400,7 +401,8 @@ export default function Home() {
     // The data to display: either live result or historical chat
     const displayData = historyData?.messages?.[0] ?? data;
 
-    const showStreamingBattle = streaming && (model1 || model2 || judge || status);
+    // Show streaming panel while actively streaming OR while awaiting history fetch after stream ended
+    const showStreamingBattle = (streaming || historyLoading) && (model1 || model2 || judge || status);
 
     return (
         <div className="flex h-screen bg-[#0b0c0f] text-on-surface font-outfit overflow-hidden grid-bg">
@@ -519,8 +521,8 @@ export default function Home() {
                             </div>
                         )}
 
-                        {/* Live Single Message (non-thread mode) */}
-                        {!historyData && data && !loading && (
+                        {/* Live Single Message (non-thread mode) — only show if no history loaded and not fetching it */}
+                        {!historyData && !historyLoading && data && !loading && (
                             <RenderMessage msg={data} index={0} total={1} />
                         )}
 
